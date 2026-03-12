@@ -332,31 +332,15 @@ def format_match_dto(match, user_id, db):
 
 @app.on_event("startup")
 def startup_event():
+    # 🚨 [임시] DB 구조를 완전히 새로 고치고 싶을 때만 사용!
+    # 이 두 줄을 넣고 배포하면 기존 테이블을 다 부수고 새로 만듭니다.
+    # models.Base.metadata.drop_all(bind=database.engine) 
+    # models.Base.metadata.create_all(bind=database.engine)
+
     db = database.SessionLocal()
     try:
-        # 1. 테스트용 팀 데이터 (SSG, KIA)가 없으면 생성
-        if db.query(models.Team).count() == 0:
-            teams = [
-                models.Team(name="SSG Landers", rank=1, logo_url="https://example.com/ssg.png"),
-                models.Team(name="KIA Tigers", rank=2, logo_url="https://example.com/kia.png"),
-                models.Team(name="LG Twins", rank=3, logo_url="https://example.com/lg.png")
-            ]
-            db.add_all(teams)
-            db.commit()
-            print("✅ 테스트용 팀 데이터 생성 완료")
-
-        # 2. 테스트용 Admin 계정 생성 (이미 있으면 스킵)
-        admin_user = db.query(models.User).filter(models.User.username == "admin").first()
-        if not admin_user:
-            new_admin = models.User(
-                username="admin",
-                password="hashed_password_1234", # 클라이언트에서 해시해서 보낸다고 가정
-                role="admin",
-                secret_key="admin-special-key"   # 테스트용 고정 키
-            )
-            db.add(new_admin)
-            db.commit()
-            print("✅ 테스트용 Admin 계정 생성 완료 (Key: admin-special-key)")
-            
+        # 기존 초기화 로직은 이제 지워도 무방합니다.
+        # 필요하다면 나중에 별도의 'seed.py' 파일로 관리하는 게 정석입니다.
+        pass
     finally:
         db.close()
