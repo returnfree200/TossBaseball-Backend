@@ -347,7 +347,7 @@ def settle_user_rating_test(user_id: int, is_correct: bool, db: Session = Depend
 @app.on_event("startup")
 def startup_event():
     from app.database import engine
-    # 이 줄은 남겨두는 게 좋습니다. 
-    # 테이블이 이미 있으면 아무 일도 안 하고, 혹시라도 없으면 새로 만들어주거든요.
+    # 🚨 DB의 모든 테이블을 삭제하고 새 모델(rating 포함)로 다시 생성합니다.
+    models.Base.metadata.drop_all(bind=engine)
     models.Base.metadata.create_all(bind=engine)
-    print("🚀 TossBaseball Backend 서버가 정상적으로 실행되었습니다!")
+    print("✅ [DB RESET] 모든 테이블이 새 구조로 재생성되었습니다!")
