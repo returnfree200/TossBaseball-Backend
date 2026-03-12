@@ -4,6 +4,7 @@ from fastapi import FastAPI, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from . import models, schemas, database, services
 from app.database import get_db
+from app.services import settle_user_rating
 
 # DB 테이블 생성 (실전 초기화)
 models.Base.metadata.create_all(bind=database.engine)
@@ -113,7 +114,7 @@ def finish_match(
     if not match:
         raise HTTPException(status_code=404, detail={"error": "match not found"})
     
-    # 3. winner_team_id 검증: 해당 경기의 팀(A or B)이 맞는지 확인
+    # 3. winner_team_id 검증
     if request.winner_team_id not in [match.team_a_id, match.team_b_id]:
         raise HTTPException(
             status_code=422, 
@@ -123,9 +124,21 @@ def finish_match(
     # 4. 결과 업데이트
     match.winner_team_id = request.winner_team_id
     match.end_time = request.end_time
-    db.commit()
     
-    return {"match_id": match_id}
+    # 🔥 [추가] 5. 이 경기에 예측한 모든 유저 정산 로직
+    # 이 경기에 배팅한 모든 유저 데이터를 가져옵니다.
+    predictions = db.query(models.Prediction).filter(models.Prediction.match_id == match_id).all()
+    
+    for pred in predictions:
+        # 유저가 선택한 팀이 실제 승리 팀과 같은지 확인
+        is_correct = (pred.predicted_team_id == request.winner_team_id)
+        
+        # services.py의 정산 함수 호출 (유저의 rating 업데이트)
+        settle_user_rating(db, pred.user_id, is_correct)
+    
+    db.commit() # 모든 변경사항(경기 결과 + 유저 점수)을 한 번에 저장!
+    
+    return {"match_id": match_id, "message": f"{len(predictions)}명의 유저 정산 완료"}
 
 # [PATCH] 경기 취소 처리
 @app.patch("/matches/{match_id}/cancel")
