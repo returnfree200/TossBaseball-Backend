@@ -18,7 +18,7 @@ if SQLALCHEMY_DATABASE_URL and SQLALCHEMY_DATABASE_URL.startswith("postgres://")
 # 4. 방어 코드: 만약 주소가 없다면 에러 메시지를 명확히 출력
 if not SQLALCHEMY_DATABASE_URL:
     print("❌ 에러: DATABASE_URL 환경 변수를 찾을 수 없습니다.")
-    # 로컬 테스트용 백업 주소 (비밀번호는 지호님 것으로 수정하세요)
+    # 로컬 테스트용 백업 주소
     # SQLALCHEMY_DATABASE_URL = "postgresql://postgres:1234@localhost/toss_baseball"
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
