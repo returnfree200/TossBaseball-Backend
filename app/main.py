@@ -347,7 +347,6 @@ def settle_user_rating_test(user_id: int, is_correct: bool, db: Session = Depend
 @app.on_event("startup")
 def startup_event():
     from app.database import engine
-    # 🚨 DB의 모든 테이블을 삭제하고 새 모델(rating 포함)로 다시 생성합니다.
-    models.Base.metadata.drop_all(bind=engine)
+    # 이 줄만 남겨두면, 이미 있는 테이블은 건드리지 않고 안전하게 유지됩니다.
     models.Base.metadata.create_all(bind=engine)
-    print("✅ [DB RESET] 모든 테이블이 새 구조로 재생성되었습니다!")
+    print("🚀 서버가 안전한 모드로 시작되었습니다.")
