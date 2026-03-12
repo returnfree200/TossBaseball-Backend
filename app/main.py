@@ -36,6 +36,17 @@ def register_user(user: schemas.UserCreate, db: Session = Depends(database.get_d
     db.refresh(new_user)
     return new_user
 
+@app.get("/users/me")
+def get_my_info(secret_key: str, db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.secret_key == secret_key).first()
+    if not user:
+        return {"error": "invalid secret_key"}
+    return {
+        "username": user.username,
+        "rating": user.rating,
+        "role": user.role
+    }
+
 # --- 로그인 (2.2) ---
 @app.post("/users/login")
 def login(request: schemas.LoginRequest, db: Session = Depends(database.get_db)):
