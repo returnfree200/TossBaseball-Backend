@@ -332,15 +332,8 @@ def format_match_dto(match, user_id, db):
 
 @app.on_event("startup")
 def startup_event():
-    # 🚨 [임시] DB 구조를 완전히 새로 고치고 싶을 때만 사용!
-    # 이 두 줄을 넣고 배포하면 기존 테이블을 다 부수고 새로 만듭니다.
-    # models.Base.metadata.drop_all(bind=database.engine) 
-    # models.Base.metadata.create_all(bind=database.engine)
-
-    db = database.SessionLocal()
-    try:
-        # 기존 초기화 로직은 이제 지워도 무방합니다.
-        # 필요하다면 나중에 별도의 'seed.py' 파일로 관리하는 게 정석입니다.
-        pass
-    finally:
-        db.close()
+    from app.database import engine
+    # 이 줄은 남겨두는 게 좋습니다. 
+    # 테이블이 이미 있으면 아무 일도 안 하고, 혹시라도 없으면 새로 만들어주거든요.
+    models.Base.metadata.create_all(bind=engine)
+    print("🚀 TossBaseball Backend 서버가 정상적으로 실행되었습니다!")
