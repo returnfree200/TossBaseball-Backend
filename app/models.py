@@ -4,12 +4,20 @@ from .database import Base
 
 class User(Base):
     __tablename__ = "users"
+    
     id = Column(BigInteger, primary_key=True, index=True)
     username = Column(String, unique=True, nullable=False)
     password = Column(String, nullable=False)
     role = Column(String, default="user", nullable=False)
     secret_key = Column(String, unique=True, index=True, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    # --- 📈 레이팅 시스템 ---
+    # 기본 1000점 시작 (스타크래프트/바둑 방식)
+    rating = Column(Integer, default=1000, nullable=False)
+    
+    # 랭킹 산출을 위해 총 예측 횟수 정도는 남겨두는 게 좋습니다. (신뢰도 지표)
+    total_predictions = Column(Integer, default=0, nullable=False)
 
 class Team(Base):
     __tablename__ = "teams"
