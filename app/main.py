@@ -2,7 +2,7 @@ import uuid
 from typing import List
 from fastapi import FastAPI, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from . import models, schemas, database
+from . import models, schemas, database, services
 
 # DB 테이블 생성 (실전 초기화)
 models.Base.metadata.create_all(bind=database.engine)
@@ -327,6 +327,19 @@ def format_match_dto(match, user_id, db):
         "team_a_prediction_count": count_a, "team_b_prediction_count": count_b
     }
 
+@app.post("/users/{user_id}/settle-test")
+def settle_user_rating_test(user_id: int, is_correct: bool, db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # services.py에 정의한 함수 호출
+    user.rating = services.calculate_rating_change(user.rating, is_correct)
+    user.total_predictions += 1
+    
+    db.commit()
+    db.refresh(user)
+    return {"username": user.username, "new_rating": user.rating}
 
 # app/main.py
 
