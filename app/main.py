@@ -3,6 +3,7 @@ from typing import List
 from fastapi import FastAPI, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from . import models, schemas, database, services
+from app.database import get_db
 
 # DB 테이블 생성 (실전 초기화)
 models.Base.metadata.create_all(bind=database.engine)
